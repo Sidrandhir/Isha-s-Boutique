@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1250" viewBox="0 0 1000 1250" role="img" aria-label="Isha's Boutique — Stitch School campaign tile">
+  <defs>
+    <!-- running-stitch trim, drawn from the boutique's own craft -->
+    <pattern id="stitch" width="44" height="14" patternUnits="userSpaceOnUse">
+      <rect width="44" height="14" fill="none"/>
+      <path d="M2 7h20" stroke="#FFB800" stroke-width="3" stroke-linecap="square"/>
+    </pattern>
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M50 0V50H0" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+    <clipPath id="frame"><rect width="1000" height="1250"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1000" height="1250" fill="#101010"/>
+    <rect width="1000" height="1250" fill="url(#grid)"/>
+
+    <!-- logo motif: rising sun + core -->
+    <circle cx="500" cy="300" r="150" fill="#E4121F"/>
+    <circle cx="500" cy="382" r="52" fill="#FFB800"/>
+    <rect x="230" y="452" width="540" height="14" fill="#FFFFFF"/>
+
+    <!-- headline -->
+    <g fill="#FFFFFF" text-anchor="middle"
+       font-family="'Arial Black','Archivo Black',Impact,'Helvetica Neue',sans-serif"
+       font-weight="900" letter-spacing="-4">
+      <text x="500" y="640" font-size="150">STITCH</text>
+      <text x="500" y="780" font-size="150">SCHOOL</text>
+    </g>
+
+    <!-- kicker -->
+    <text x="500" y="852" fill="#FFB800" text-anchor="middle"
+          font-family="Archivo,'Helvetica Neue',Arial,sans-serif"
+          font-size="30" font-weight="700" letter-spacing="11">EST. JALGAON</text>
+
+    <!-- stitched divider -->
+    <rect x="150" y="920" width="700" height="14" fill="url(#stitch)"/>
+
+    <!-- supporting lines -->
+    <g fill="#EDEAE6" text-anchor="middle"
+       font-family="Archivo,'Helvetica Neue',Arial,sans-serif"
+       font-size="34" font-weight="500" letter-spacing="2">
+      <text x="500" y="1022">MASTER CLASSES · INTERNSHIPS</text>
+      <text x="500" y="1074">ONE-ON-ONE COACHING</text>
+    </g>
+
+    <!-- CTA chip -->
+    <rect x="330" y="1130" width="340" height="72" fill="#FFFFFF"/>
+    <text x="500" y="1177" fill="#101010" text-anchor="middle"
+          font-family="Archivo,'Helvetica Neue',Arial,sans-serif"
+          font-size="28" font-weight="800" letter-spacing="5">ENQUIRE NOW</text>
+
+    <!-- corner ticks -->
+    <g stroke="#FFFFFF" stroke-width="4" fill="none" stroke-opacity="0.5">
+      <path d="M40 92V40h52"/><path d="M908 40h52v52"/>
+      <path d="M40 1158v52h52"/><path d="M908 1210h52v-52"/>
+    </g>
+  </g>
+</svg>
