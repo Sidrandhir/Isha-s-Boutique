@@ -1,0 +1,16 @@
+# OS / editor cruft
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+
+# Source material and internal docs — not part of the published site.
+# These would otherwise be served publicly by GitHub Pages.
+*.pdf
+!assets/images/og-card.jpg
+
+# Raw camera / messaging exports. Optimised WebP derivatives are committed
+# instead; drop originals here and they stay out of the deploy.
+WhatsApp Image *
+/originals/

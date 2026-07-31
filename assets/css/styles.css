@@ -43,7 +43,10 @@
                            both long copy and wide-tracked labels.
    ============================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&display=swap');
+/* Fonts are loaded from a <link> in each page's <head>, not with @import.
+   @import here would hide the request behind this stylesheet: the browser
+   would have to fetch and parse styles.css before it even learned the fonts
+   existed, serialising two round trips and stranding the <head> preconnects. */
 
 :root{
   --ink: #101010;
@@ -456,9 +459,12 @@ section.bleed{ padding: 86px 0; }
   transform: scale(1.05);
   transition: opacity .5s var(--ease), transform .8s var(--ease);
 }
+/* The crossfade only runs on cards carrying a genuine second photograph
+   (.has-hover). Cards with a single image must never fade their main image
+   out — that would leave an empty grey box on hover. They still get the zoom. */
 .product-media .img-alt{ opacity:0; }
-.product:hover .product-media .img-main{ opacity:0; }
-.product:hover .product-media .img-alt{ opacity:1; }
+.product:hover .product-media.has-hover .img-main{ opacity:0; }
+.product:hover .product-media.has-hover .img-alt{ opacity:1; }
 .product:hover .product-media img{ transform: scale(1.09); }
 /* the campaign tile is vector artwork with intentional edge marks — never crop it */
 .product-media img[src$=".svg"],
@@ -742,31 +748,25 @@ section.bleed{ padding: 86px 0; }
 .form-two{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .form-note{ font-size:.74rem; color: var(--muted); margin-top: 14px; }
 
-/* -------------------- Newsletter -------------------- */
-.newsletter{
-  display:flex; gap:0; max-width: 460px; margin-top: 18px;
+/* -------------------- New-arrivals opt-in --------------------
+   This was an email field whose address was never stored anywhere. It is now
+   a plain WhatsApp opt-in, so nothing is collected that isn't actually used. */
+.newsletter{ max-width: 460px; margin-top: 22px; }
+.newsletter p{
+  font-size:.8rem;
+  color: rgba(255,255,255,.6);
+  margin-bottom: 12px;
 }
-.newsletter input{
-  flex:1;
-  min-width: 0;
-  background: transparent;
-  border: 1px solid var(--line-dark);
-  border-right: none;
-  color:#fff;
-  padding: 14px 16px;
-  font-family: var(--body);
-  font-size: 16px; /* prevents iOS Safari zoom-on-focus */
-}
-.newsletter input::placeholder{ color: rgba(255,255,255,.42); }
-.newsletter input:focus{ outline:none; border-color: rgba(255,255,255,.5); }
-.newsletter button{
+.newsletter a{
+  display:inline-flex; align-items:center; gap:9px;
   border:1px solid #fff; background:#fff; color: var(--ink);
-  padding: 0 24px;
+  padding: 13px 22px;
   font-size:.68rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase;
-  cursor:pointer;
-  transition: background .25s var(--ease), color .25s var(--ease);
+  transition: background .25s var(--ease), color .25s var(--ease),
+              border-color .25s var(--ease);
 }
-.newsletter button:hover{ background: var(--accent); border-color: var(--accent); color:#fff; }
+.newsletter a svg{ width:15px; height:15px; flex-shrink:0; }
+.newsletter a:hover{ background: var(--accent); border-color: var(--accent); color:#fff; }
 
 /* -------------------- Footer -------------------- */
 .site-footer{
@@ -945,9 +945,7 @@ section.bleed{ padding: 86px 0; }
   .trust-item:first-child{ border-top:none; }
   .brand-word{ font-size: 1.15rem; }
   .brand-word small{ font-size: .58rem; }
-  .newsletter{ flex-direction: column; }
-  .newsletter input{ border-right: 1px solid var(--line-dark); }
-  .newsletter button{ width:100%; padding: 13px 0; }
+  .newsletter a{ width:100%; justify-content:center; }
 }
 
 /* -------------------- Touch devices -------------------- */
@@ -959,3 +957,89 @@ section.bleed{ padding: 86px 0; }
   .mosaic .cap{ transform: translateY(0); }
   .svc-row .go{ color: var(--ink); }
 }
+
+/* -------------------- Accessibility -------------------- */
+
+/* Lets keyboard and screen-reader users jump the header and marquee.
+   Visually hidden until focused, then it drops into view. */
+.skip-link{
+  position:absolute; left:12px; top:-100px; z-index:9999;
+  background: var(--ink); color:#fff;
+  padding: 12px 18px;
+  font-size:.7rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+  transition: top .18s var(--ease);
+}
+.skip-link:focus{ top:12px; }
+
+/* A single visible focus ring for every interactive element. :focus-visible
+   keeps it off mouse clicks, so the design is untouched for pointer users. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible{
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+/* On dark panels the red ring is low-contrast — go white there. */
+.site-header a:focus-visible,
+.site-header button:focus-visible,
+.site-footer a:focus-visible,
+.hero a:focus-visible,
+.hero button:focus-visible,
+.hero-dots button:focus-visible,
+.cta-band a:focus-visible,
+.contact-panel.dark a:focus-visible,
+.on-ink a:focus-visible{
+  outline-color: #fff;
+}
+
+/* Slideshow pause control (WCAG 2.2.2) */
+.hero-pause{
+  width:26px; height:26px;
+  display:inline-flex; align-items:center; justify-content:center;
+  margin-left: 10px;
+  padding:0;
+  border:1px solid rgba(255,255,255,.55);
+  border-radius:50%;
+  background: rgba(0,0,0,.28);
+  color:#fff;
+  cursor:pointer;
+  flex-shrink:0;
+  transition: background .25s var(--ease), border-color .25s var(--ease);
+}
+.hero-pause svg{ width:12px; height:12px; }
+.hero-pause:hover{ background: rgba(0,0,0,.6); border-color:#fff; }
+
+/* -------------------- Form validation feedback -------------------- */
+.form-row .opt{
+  color: var(--muted);
+  font-weight:600;
+  letter-spacing:.04em;
+  text-transform:none;
+}
+.field-error{
+  display:block;
+  min-height: 1em;
+  margin-top: 7px;
+  font-size:.74rem;
+  font-weight:600;
+  color: var(--accent);
+}
+.form-row input[aria-invalid="true"],
+.form-row select[aria-invalid="true"],
+.form-row textarea[aria-invalid="true"]{
+  border-color: var(--accent);
+}
+.form-status{
+  margin-top: 14px;
+  font-size:.8rem;
+  font-weight:600;
+  line-height:1.5;
+}
+.form-status:empty{ margin-top:0; }
+.form-status.is-ok{ color: #1B7F4B; }
+.form-status.is-error{ color: var(--accent); }
+.form-status a{ text-decoration: underline; }
