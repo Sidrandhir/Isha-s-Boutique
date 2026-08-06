@@ -261,4 +261,224 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#year, [data-year]").forEach((el) => {
     el.textContent = new Date().getFullYear();
   });
+
+  /* ---------- Staggered reveal (reveal-stagger class) ---------- */
+  const staggerEls = document.querySelectorAll(".reveal-stagger");
+  if (!prefersReducedMotion() && "IntersectionObserver" in window && staggerEls.length) {
+    const staggerIO = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            staggerIO.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" }
+    );
+    staggerEls.forEach((el) => staggerIO.observe(el));
+  } else {
+    staggerEls.forEach((el) => el.classList.add("is-visible"));
+  }
+
+  /* ---------- Smooth count-up for stat numbers ---------- */
+  const statBolds = document.querySelectorAll(".stat b");
+  if (!prefersReducedMotion() && "IntersectionObserver" in window) {
+    const countIO = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target;
+        const raw = el.textContent.trim();
+        const num = parseFloat(raw.replace(/[^0-9.]/g, ""));
+        const suffix = raw.replace(/[0-9.]/g, "");
+        if (isNaN(num) || num === 0) return;
+        let start = 0;
+        const duration = 1200;
+        const step = (timestamp) => {
+          if (!start) start = timestamp;
+          const progress = Math.min((timestamp - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          el.textContent = (Math.round(ease * num * 10) / 10) + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+        countIO.unobserve(el);
+      });
+    }, { threshold: 0.5 });
+    statBolds.forEach((el) => countIO.observe(el));
+  }
+
+  /* ---------- HERO CAROUSEL LOGIC ---------- */
+  const heroV3 = document.querySelector(".hero-v5") || document.querySelector(".hero-v4") || document.getElementById("hero-v3");
+  if (heroV3) {
+    const slides = Array.from(heroV3.querySelectorAll(".hv5-slide, .hv3-slide"));
+    const thumbs = Array.from(heroV3.querySelectorAll(".hv5-thumb, .hv3-thumb"));
+    const prevBtn = document.getElementById("hv3-prev-btn");
+    const nextBtn = document.getElementById("hv3-next-btn");
+    const currentNum = document.getElementById("hv3-current-num");
+    const progressBar = document.getElementById("hv3-progress");
+
+    let currentIdx = 0;
+    let autoTimer = null;
+
+    function goToSlide(index) {
+      currentIdx = (index + slides.length) % slides.length;
+
+      slides.forEach((s, i) => s.classList.toggle("is-active", i === currentIdx));
+      thumbs.forEach((t, i) => t.classList.toggle("is-active", i === currentIdx));
+
+      if (currentNum) {
+        currentNum.textContent = String(currentIdx + 1).padStart(2, "0");
+      }
+      if (progressBar) {
+        progressBar.style.width = `${((currentIdx + 1) / slides.length) * 100}%`;
+      }
+    }
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      if (!prefersReducedMotion()) {
+        autoTimer = setInterval(() => goToSlide(currentIdx + 1), 5000);
+      }
+    }
+
+    function stopAutoPlay() {
+      if (autoTimer) clearInterval(autoTimer);
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        goToSlide(currentIdx - 1);
+        startAutoPlay();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        goToSlide(currentIdx + 1);
+        startAutoPlay();
+      });
+    }
+
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener("click", () => {
+        const slideIdx = parseInt(thumb.dataset.slide, 10);
+        goToSlide(slideIdx);
+        startAutoPlay();
+      });
+    });
+
+    heroV3.addEventListener("mouseenter", stopAutoPlay);
+    heroV3.addEventListener("mouseleave", startAutoPlay);
+
+    goToSlide(0);
+    startAutoPlay();
+  }
+
+  /* ---------- LIGHTBOX GALLERY LOGIC ---------- */
+  const lookbookImages = [
+    { src: "assets/images/flat-4-800w.webp", alt: "Paithani Zari Silk Frock" },
+    { src: "assets/images/hero-vogue-couture.png", alt: "Atelier Silk Couture" },
+    { src: "assets/images/model-2-800w.webp", alt: "Lavender Smocked Organza Frock" },
+    { src: "assets/images/flat-5-800w.webp", alt: "Bluebell Bow Printed Cotton Frock" },
+    { src: "assets/images/model-6-800w.webp", alt: "Festive Gold Brocade Set" },
+    { src: "assets/images/hero-bridal-couture.png", alt: "Zardosi Handwork Bridal Blouse" },
+    { src: "assets/images/collection/crimson-bridal-lehenga.png", alt: "Crimson Red Bridal Lehenga with Gold Peacock Embroidery" },
+    { src: "assets/images/collection/mustard-handblock-saree.png", alt: "Mustard Handblock Printed Saree in Artisan Studio" },
+    { src: "assets/images/collection/lavender-butterfly-gown.png", alt: "Lavender Butterfly Organza Kids Gown" },
+    { src: "assets/images/collection/emerald-anarkali-gown.png", alt: "Emerald Silk Anarkali with Gold Thread Embroidery" },
+    { src: "assets/images/collection/teal-paithani-saree.png", alt: "Teal Paithani Silk Saree with Peacock Pallu" },
+    { src: "assets/images/collection/rose-smocked-frock-girl.png", alt: "Rose Garden Smocked Cotton Frock for Girls" },
+    { src: "assets/images/collection/kids-smocked-pastel.png", alt: "Pastel Pink Smocked Cotton Frock" },
+    { src: "assets/images/collection/kids-victorian-heirloom.jpg", alt: "Victorian Lace Heirloom Gown" },
+    { src: "assets/images/collection/kids-canary-yellow.png", alt: "Canary Yellow Smocked Daisy Frock" },
+    { src: "assets/images/collection/kids-festive-brocade.png", alt: "Royal Blue Gold Brocade Frock" },
+    { src: "assets/images/collection/kids-ruby-satin-bow.jpg", alt: "Royal Ruby Satin Pearl Bow Dress" },
+    { src: "assets/images/model-1-800w.webp", alt: "Lace Embroidery Gown" },
+    { src: "assets/images/model-3-800w.webp", alt: "Wildflower Botanical Handprint Dress" },
+    { src: "assets/images/model-8-800w.webp", alt: "Terracotta Rust Linen Smock Dress" }
+  ];
+
+  const modal = document.getElementById("gallery-modal");
+  const modalImg = document.getElementById("modal-img-el");
+  const modalCaption = document.getElementById("modal-caption-el");
+  const modalCounter = document.getElementById("modal-counter-el");
+  const closeBtn = document.getElementById("modal-close-btn");
+  const prevBtnModal = document.getElementById("modal-prev-btn");
+  const nextBtnModal = document.getElementById("modal-next-btn");
+  const openLookbookBtn = document.getElementById("open-lookbook-btn");
+
+  let activeGalleryIdx = 0;
+
+  function openGallery(index) {
+    if (!modal) return;
+    activeGalleryIdx = index;
+    updateGalleryStage();
+    modal.classList.add("is-active");
+    document.body.style.overflow = "hidden"; // disable scroll
+  }
+
+  function closeGallery() {
+    if (!modal) return;
+    modal.classList.remove("is-active");
+    document.body.style.overflow = ""; // enable scroll
+  }
+
+  function updateGalleryStage() {
+    if (!modalImg || !modalCaption || !modalCounter) return;
+    const item = lookbookImages[activeGalleryIdx];
+    modalImg.src = item.src;
+    modalImg.alt = item.alt;
+    modalCaption.textContent = item.alt;
+    modalCounter.textContent = `${activeGalleryIdx + 1} / ${lookbookImages.length}`;
+  }
+
+  function nextGalleryItem() {
+    activeGalleryIdx = (activeGalleryIdx + 1) % lookbookImages.length;
+    updateGalleryStage();
+  }
+
+  function prevGalleryItem() {
+    activeGalleryIdx = (activeGalleryIdx - 1 + lookbookImages.length) % lookbookImages.length;
+    updateGalleryStage();
+  }
+
+  // Bind clicks on mosaic items
+  document.querySelectorAll("a[data-gallery-idx]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      const idx = parseInt(el.dataset.galleryIdx || el.getAttribute("data-gallery-idx"), 10);
+      openGallery(idx);
+    });
+  });
+
+  // Bind open lookbook button
+  if (openLookbookBtn) {
+    openLookbookBtn.addEventListener("click", () => {
+      openGallery(0);
+    });
+  }
+
+  // Close triggers
+  if (closeBtn) closeBtn.addEventListener("click", closeGallery);
+  if (modal) {
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal || e.target.classList.contains("modal-stage")) {
+        closeGallery();
+      }
+    });
+  }
+
+  // Arrow controls
+  if (prevBtnModal) prevBtnModal.addEventListener("click", prevGalleryItem);
+  if (nextBtnModal) nextBtnModal.addEventListener("click", nextGalleryItem);
+
+  // Keyboard navigation
+  document.addEventListener("keydown", (e) => {
+    if (!modal || !modal.classList.contains("is-active")) return;
+    if (e.key === "Escape") closeGallery();
+    if (e.key === "ArrowRight") nextGalleryItem();
+    if (e.key === "ArrowLeft") prevGalleryItem();
+  });
+
 });
