@@ -1918,7 +1918,9 @@ section.bleed{ padding: 86px 0; }
   color: rgba(255,255,255,.6);
   margin-bottom: 12px;
 }
-.newsletter a{
+.newsletter a,
+.footer-col .newsletter a,
+.footer-col .newsletter a * {
   display:inline-flex !important; align-items:center !important; gap:9px !important;
   border:2px solid #fff !important; background:#fff !important; color: #101010 !important;
   padding: 12px 20px !important;
@@ -1926,11 +1928,17 @@ section.bleed{ padding: 86px 0; }
   text-transform:uppercase !important; text-decoration: none !important;
   transition: background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease);
 }
-.newsletter a svg{ width:15px; height:15px; flex-shrink:0; fill: #101010; }
-.newsletter a:hover{
-  background: var(--accent) !important; border-color: var(--accent) !important; color:#fff !important;
+.newsletter a svg,
+.footer-col .newsletter a svg {
+  width:15px; height:15px; flex-shrink:0; fill: #101010 !important;
 }
-.newsletter a:hover svg{ fill: #fff; }
+.newsletter a:hover,
+.footer-col .newsletter a:hover,
+.footer-col .newsletter a:hover * {
+  background: var(--accent, #25D366) !important; border-color: var(--accent, #25D366) !important; color:#fff !important;
+}
+.newsletter a:hover svg,
+.footer-col .newsletter a:hover svg { fill: #fff !important; }
 
 /* -------------------- Footer -------------------- */
 .site-footer{
