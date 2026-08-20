@@ -2475,3 +2475,72 @@ textarea:focus-visible,
 }
 @keyframes scrollHintPulse{ 0%,100%{ opacity:.4; } 50%{ opacity:1; } }
 @media (max-width: 680px){ .scroll-hint{ display: block; } }
+/* -------------------- HIGH CONTRAST VISIBLE FOOTER STYLES -------------------- */
+.footer, .site-footer {
+  background: #121212 !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+.footer-col h4 {
+  color: #FFFFFF !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 18px !important;
+}
+.footer-col p, .footer-brand p, .brand-col p {
+  color: rgba(255, 255, 255, 0.82) !important;
+  font-size: 0.88rem !important;
+  line-height: 1.6 !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+}
+.footer-col p strong {
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+}
+.footer-col ul li {
+  margin-bottom: 10px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+.footer-col a {
+  font-size: 0.88rem !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  transition: color 0.2s ease !important;
+}
+.footer-col a:hover {
+  color: #FFFFFF !important;
+  text-decoration: underline !important;
+}
+.footer-bottom, .footer-btm {
+  border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding-top: 22px !important;
+  margin-top: 24px !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.04em !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+.footer-bottom span, .footer-bottom p, .footer-btm p {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+.powered-by-sedrex {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 0.95rem !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+  margin-top: 6px !important;
+}
+.powered-by-sedrex:hover {
+  opacity: 1 !important;
+  color: #FFFFFF !important;
+}
+.powered-by-sedrex img {
+  height: 34px !important;
+  width: auto !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
