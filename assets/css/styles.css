@@ -258,13 +258,20 @@ p + p{ margin-top: 1em; }
 
 /* -------------------- Header -------------------- */
 .site-header{
-  position: sticky;
-  top: 0;
-  z-index: 120;
-  background: rgba(255,255,255,.97);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+body {
+  padding-top: var(--header-h, 94px);
 }
 .site-header .wrap{
   height: var(--header-h);
