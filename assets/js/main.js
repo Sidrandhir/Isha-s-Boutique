@@ -1,5 +1,5 @@
 /* =============================================================
-   ISHA'S BOUTIQUE — shared site behaviour
+   ISHA'S BOUTIQUE — shared site behaviour & gallery engine
    ============================================================= */
 
 // WhatsApp number (from business card). Change here once to update everywhere.
@@ -30,8 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
       a.addEventListener("click", () => setOpen(false))
     );
 
-    // Escape closes the menu and hands focus back to the button that opened it,
-    // so keyboard users are never stranded inside a closed menu.
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && navLinks.classList.contains("open")) {
         setOpen(false);
@@ -39,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Tapping outside the open menu closes it.
     document.addEventListener("click", (e) => {
       if (!navLinks.classList.contains("open")) return;
       if (!navLinks.contains(e.target) && !toggle.contains(e.target)) {
@@ -69,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     revealEls.forEach((el) => el.classList.add("is-visible"));
   }
 
-  /* ---------- Marquee: duplicate the track so the loop is seamless ---------- */
+  /* ---------- Marquee ---------- */
   document.querySelectorAll(".marquee").forEach((marquee) => {
     const track = marquee.querySelector(".marquee-track");
     if (!track || track.dataset.cloned === "true") return;
@@ -90,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const delay = Math.max(2500, parseInt(root.dataset.interval || "5500", 10));
     let idx = 0;
     let timer = null;
-    let paused = prefersReducedMotion(); // never auto-advance if motion is reduced
+    let paused = prefersReducedMotion();
 
     const dots = slides.map((_, i) => {
       if (!dotsWrap) return null;
@@ -106,7 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return b;
     });
 
-    // WCAG 2.2.2: anything that moves automatically needs a visible pause.
     let pauseBtn = null;
     if (dotsWrap) {
       pauseBtn = document.createElement("button");
@@ -153,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
       start();
     }
 
-    // Hover pause is a convenience; it must not override an explicit pause.
     hero.addEventListener("mouseenter", stop);
     hero.addEventListener("mouseleave", () => !paused && start());
     document.addEventListener("visibilitychange", () =>
@@ -165,9 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
     start();
   });
 
-  /* ---------- Product cards -> WhatsApp enquiry ----------
-     These are real links with a real href rather than window.open() calls, so
-     they survive popup blockers and still support middle-click / open-in-new-tab. */
+  /* ---------- Product cards -> WhatsApp enquiry ---------- */
   document.querySelectorAll("[data-enquire]").forEach((el) => {
     const piece = el.dataset.enquire;
     el.href = waLink(
@@ -177,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.rel = "noopener";
   });
 
-  /* ---------- Lead form -> WhatsApp auto-message ---------- */
+  /* ---------- Lead form ---------- */
   const leadForm = document.getElementById("lead-form");
   if (leadForm) {
     const status = document.getElementById("form-status");
@@ -215,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
         showError(name, "Please tell us your name.");
         firstBad = firstBad || name;
       }
-      // Optional, but if given it has to look like a real Indian mobile number.
       const digits = phone.value.replace(/\D/g, "");
       if (phone.value.trim() && (digits.length < 10 || digits.length > 12)) {
         showError(phone, "That doesn't look like a valid phone number.");
@@ -241,7 +233,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const url = waLink(lines.join("\n"));
       const win = window.open(url, "_blank", "noopener");
 
-      // A blocked popup used to fail silently. Now it degrades to a visible link.
       if (status) {
         if (!win || win.closed || typeof win.closed === "undefined") {
           status.className = "form-status is-error";
@@ -261,52 +252,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("#year, [data-year]").forEach((el) => {
     el.textContent = new Date().getFullYear();
   });
-
-  /* ---------- Staggered reveal (reveal-stagger class) ---------- */
-  const staggerEls = document.querySelectorAll(".reveal-stagger");
-  if (!prefersReducedMotion() && "IntersectionObserver" in window && staggerEls.length) {
-    const staggerIO = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            staggerIO.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -30px 0px" }
-    );
-    staggerEls.forEach((el) => staggerIO.observe(el));
-  } else {
-    staggerEls.forEach((el) => el.classList.add("is-visible"));
-  }
-
-  /* ---------- Smooth count-up for stat numbers ---------- */
-  const statBolds = document.querySelectorAll(".stat b");
-  if (!prefersReducedMotion() && "IntersectionObserver" in window) {
-    const countIO = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const el = entry.target;
-        const raw = el.textContent.trim();
-        const num = parseFloat(raw.replace(/[^0-9.]/g, ""));
-        const suffix = raw.replace(/[0-9.]/g, "");
-        if (isNaN(num) || num === 0) return;
-        let start = 0;
-        const duration = 1200;
-        const step = (timestamp) => {
-          if (!start) start = timestamp;
-          const progress = Math.min((timestamp - start) / duration, 1);
-          const ease = 1 - Math.pow(1 - progress, 3);
-          el.textContent = (Math.round(ease * num * 10) / 10) + suffix;
-          if (progress < 1) requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-        countIO.unobserve(el);
-      });
-    }, { threshold: 0.5 });
-    statBolds.forEach((el) => countIO.observe(el));
-  }
 
   /* ---------- HERO CAROUSEL LOGIC ---------- */
   const heroV3 = document.querySelector(".hero-v5") || document.querySelector(".hero-v4") || document.getElementById("hero-v3");
@@ -375,32 +320,108 @@ document.addEventListener("DOMContentLoaded", () => {
     startAutoPlay();
   }
 
-  /* ---------- LIGHTBOX GALLERY LOGIC ---------- */
+  /* =============================================================
+     COMPLETE PORTFOLIO DATABASE & LIGHTBOX WITH ZOOM ENGINE
+     ============================================================= */
+
   const lookbookImages = [
-    { src: "assets/images/flat-4-800w.webp", alt: "Paithani Zari Silk Frock" },
-    { src: "assets/images/hero-vogue-couture.png", alt: "Atelier Silk Couture" },
-    { src: "assets/images/model-2-800w.webp", alt: "Lavender Smocked Organza Frock" },
-    { src: "assets/images/flat-5-800w.webp", alt: "Bluebell Bow Printed Cotton Frock" },
-    { src: "assets/images/model-6-800w.webp", alt: "Festive Gold Brocade Set" },
-    { src: "assets/images/hero-bridal-couture.png", alt: "Zardosi Handwork Bridal Blouse" },
-    { src: "assets/images/collection/crimson-bridal-lehenga.png", alt: "Crimson Red Bridal Lehenga with Gold Peacock Embroidery" },
-    { src: "assets/images/collection/mustard-handblock-saree.png", alt: "Mustard Handblock Printed Saree in Artisan Studio" },
-    { src: "assets/images/collection/lavender-butterfly-gown.png", alt: "Lavender Butterfly Organza Kids Gown" },
-    { src: "assets/images/collection/emerald-anarkali-gown.png", alt: "Emerald Silk Anarkali with Gold Thread Embroidery" },
-    { src: "assets/images/collection/teal-paithani-saree.png", alt: "Teal Paithani Silk Saree with Peacock Pallu" },
-    { src: "assets/images/collection/rose-smocked-frock-girl.png", alt: "Rose Garden Smocked Cotton Frock for Girls" },
-    { src: "assets/images/collection/kids-smocked-pastel.png", alt: "Pastel Pink Smocked Cotton Frock" },
-    { src: "assets/images/collection/kids-victorian-heirloom.jpg", alt: "Victorian Lace Heirloom Gown" },
-    { src: "assets/images/collection/kids-canary-yellow.png", alt: "Canary Yellow Smocked Daisy Frock" },
-    { src: "assets/images/collection/kids-festive-brocade.png", alt: "Royal Blue Gold Brocade Frock" },
-    { src: "assets/images/collection/kids-ruby-satin-bow.jpg", alt: "Royal Ruby Satin Pearl Bow Dress" },
-    { src: "assets/images/model-1-800w.webp", alt: "Lace Embroidery Gown" },
-    { src: "assets/images/model-3-800w.webp", alt: "Wildflower Botanical Handprint Dress" },
-    { src: "assets/images/model-8-800w.webp", alt: "Terracotta Rust Linen Smock Dress" }
+    { src: "assets/images/hero-saree.png", alt: "Magenta Silk Saree with Hand-Embroidered Zardosi Blouse", cat: "sarees" },
+    { src: "assets/images/gallery/gallery-01.jpg", alt: "Handcrafted Silk Frock with Traditional Zari Border", cat: "kids" },
+    { src: "assets/images/gallery/gallery-02.jpg", alt: "Emerald Green Festive Anarkali Gown", cat: "bridal" },
+    { src: "assets/images/gallery/gallery-03.jpg", alt: "Pastel Floral Smocked Kids Outfit", cat: "kids" },
+    { src: "assets/images/gallery/gallery-04.jpg", alt: "Royal Purple Zari Bordered Girl's Dress", cat: "kids" },
+    { src: "assets/images/gallery/gallery-05.jpg", alt: "Custom Zardosi Handwork Designer Blouse", cat: "embroidery" },
+    { src: "assets/images/gallery/gallery-06.jpg", alt: "Crimson Red Bridal Dupatta & Lehenga Detail", cat: "bridal" },
+    { src: "assets/images/gallery/gallery-07.jpg", alt: "Traditional Maharastrian Paithani Silk Saree", cat: "sarees" },
+    { src: "assets/images/gallery/gallery-08.jpg", alt: "Yellow Handblock Printed Cotton Kurta Set", cat: "sarees" },
+    { src: "assets/images/gallery/gallery-09.jpg", alt: "Designer Heavy Brocade Lehenga Set", cat: "bridal" },
+    { src: "assets/images/gallery/gallery-10.jpg", alt: "Cute Smocked Cotton Summer Frock", cat: "kids" },
+    { src: "assets/images/gallery/gallery-11.jpg", alt: "Royal Blue Hand-Embroidered Silk Blouse", cat: "embroidery" },
+    { src: "assets/images/gallery/gallery-12.jpg", alt: "Lavender Butterfly Organza Party Gown", cat: "kids" },
+    { src: "assets/images/gallery/gallery-13.jpg", alt: "Mustard Yellow Silk Saree with Zari Motif", cat: "sarees" },
+    { src: "assets/images/gallery/gallery-14.jpg", alt: "Teal Blue Silk Anarkali Dress", cat: "bridal" },
+    { src: "assets/images/gallery/gallery-15.jpg", alt: "Rose Pink Smocked Cotton Dress for Girls", cat: "kids" },
+    { src: "assets/images/gallery/gallery-16.jpg", alt: "Gold Thread Cutwork Designer Blouse Back", cat: "embroidery" },
+    { src: "assets/images/gallery/gallery-17.jpg", alt: "Royal Ruby Satin Dress with Bow & Pearls", cat: "kids" },
+    { src: "assets/images/gallery/gallery-18.jpg", alt: "Traditional Festive Kurta Set for Kids", cat: "kids" },
+    { src: "assets/images/gallery/gallery-19.jpg", alt: "Zardosi Embroidered Bridal Velvet Blouse", cat: "embroidery" },
+    { src: "assets/images/gallery/gallery-20.jpg", alt: "Pastel Pink Smocked Linen Frock", cat: "kids" },
+    { src: "assets/images/gallery/gallery-21.jpg", alt: "Victorian Lace Heirloom Gown", cat: "kids" },
+    { src: "assets/images/gallery/gallery-22.jpg", alt: "Canary Yellow Smocked Daisy Dress", cat: "kids" },
+    { src: "assets/images/gallery/gallery-23.jpg", alt: "Heavy Peacock Zardosi Work Bridal Lehenga", cat: "bridal" },
+    { src: "assets/images/gallery/gallery-24.jpg", alt: "Mustard Handblock Printed Saree", cat: "sarees" },
+    { src: "assets/images/gallery/gallery-25.jpg", alt: "Teal Paithani Silk Saree Pallu", cat: "sarees" },
+    { src: "assets/images/gallery/gallery-26.jpg", alt: "Sky Blue Pearl-Smocked Linen Frock", cat: "kids" },
+    { src: "assets/images/gallery/gallery-27.jpg", alt: "Sunlit Botanical Cotton Midi Dress", cat: "sarees" },
+    { src: "assets/images/gallery/gallery-28.jpg", alt: "Ivory Sheer Organza Dream Gown", cat: "bridal" },
+    { src: "assets/images/collection/crimson-bridal-lehenga.png", alt: "Crimson Red Bridal Lehenga with Gold Peacock Embroidery", cat: "bridal" },
+    { src: "assets/images/collection/mustard-handblock-saree.png", alt: "Mustard Handblock Printed Saree in Artisan Studio", cat: "sarees" },
+    { src: "assets/images/collection/lavender-butterfly-gown.png", alt: "Lavender Butterfly Organza Kids Gown", cat: "kids" },
+    { src: "assets/images/collection/emerald-anarkali-gown.png", alt: "Emerald Silk Anarkali with Gold Thread Embroidery", cat: "bridal" },
+    { src: "assets/images/collection/teal-paithani-saree.png", alt: "Teal Paithani Silk Saree with Peacock Pallu", cat: "sarees" },
+    { src: "assets/images/collection/rose-smocked-frock-girl.png", alt: "Rose Garden Smocked Cotton Frock for Girls", cat: "kids" },
+    { src: "assets/images/collection/kids-smocked-pastel.png", alt: "Pastel Pink Smocked Cotton Frock", cat: "kids" },
+    { src: "assets/images/collection/kids-victorian-heirloom.jpg", alt: "Victorian Lace Heirloom Gown", cat: "kids" },
+    { src: "assets/images/collection/kids-canary-yellow.png", alt: "Canary Yellow Smocked Daisy Frock", cat: "kids" },
+    { src: "assets/images/collection/kids-festive-brocade.png", alt: "Royal Blue Gold Brocade Frock", cat: "kids" },
+    { src: "assets/images/collection/kids-ruby-satin-bow.jpg", alt: "Royal Ruby Satin Pearl Bow Dress", cat: "kids" },
+    { src: "assets/images/collection/kids-pearl-smocked.jpg", alt: "Sky Blue Pearl Smocked Linen Frock", cat: "kids" },
+    { src: "assets/images/collection/couture-ivory-sheer.jpg", alt: "Ivory Sheer Organza Dream Gown", cat: "bridal" },
+    { src: "assets/images/collection/couture-tiered-organza.jpg", alt: "Tiered Organza Layered Couture Dress", cat: "bridal" },
+    { src: "assets/images/collection/atelier-miniature-dress.jpg", alt: "Atelier Miniature Designer Dress", cat: "kids" },
+    { src: "assets/images/collection/women-garden-midi.jpg", alt: "Sunlit Garden Botanical Midi Dress", cat: "sarees" },
+    { src: "assets/images/collection/women-sakura-chiffon.jpg", alt: "Cherry Blossom Off-Shoulder Chiffon Dress", cat: "bridal" },
+    { src: "assets/images/flat-4-800w.webp", alt: "Paithani Zari Silk Frock", cat: "kids" },
+    { src: "assets/images/hero-vogue-couture.png", alt: "Atelier Silk Couture", cat: "bridal" },
+    { src: "assets/images/model-2-800w.webp", alt: "Lavender Smocked Organza Frock", cat: "kids" },
+    { src: "assets/images/flat-5-800w.webp", alt: "Bluebell Bow Printed Cotton Frock", cat: "kids" },
+    { src: "assets/images/model-6-800w.webp", alt: "Festive Gold Brocade Set", cat: "kids" },
+    { src: "assets/images/hero-bridal-couture.png", alt: "Zardosi Handwork Bridal Blouse", cat: "embroidery" },
+    { src: "assets/images/model-1-800w.webp", alt: "Lace Embroidery Gown", cat: "bridal" },
+    { src: "assets/images/model-3-800w.webp", alt: "Wildflower Botanical Handprint Dress", cat: "sarees" },
+    { src: "assets/images/model-8-800w.webp", alt: "Terracotta Rust Linen Smock Dress", cat: "kids" }
   ];
 
+  /* ---------- FAST GALLERY GRID FILTERING ---------- */
+  const galleryGrid = document.getElementById("main-gallery-grid");
+  const filterBtns = document.querySelectorAll(".gallery-filters .filter-btn");
+
+  if (galleryGrid) {
+    const staticCards = galleryGrid.querySelectorAll(".gallery-card");
+
+    staticCards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const idx = parseInt(card.dataset.galleryIdx || "0", 10);
+        openGallery(idx);
+      });
+    });
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach((b) => {
+          b.classList.remove("is-active");
+          b.setAttribute("aria-selected", "false");
+        });
+        btn.classList.add("is-active");
+        btn.setAttribute("aria-selected", "true");
+        const filterCat = btn.dataset.filter || "all";
+
+        staticCards.forEach((card) => {
+          const cardCat = card.dataset.category;
+          if (filterCat === "all" || cardCat === filterCat) {
+            card.classList.remove("is-hidden");
+          } else {
+            card.classList.add("is-hidden");
+          }
+        });
+      });
+    });
+  }
+
+  /* ---------- LIGHTBOX MODAL WITH ZOOM ENGINE ---------- */
   const modal = document.getElementById("gallery-modal");
   const modalImg = document.getElementById("modal-img-el");
+  const modalImgWrap = document.getElementById("modal-img-wrap");
   const modalCaption = document.getElementById("modal-caption-el");
   const modalCounter = document.getElementById("modal-counter-el");
   const closeBtn = document.getElementById("modal-close-btn");
@@ -408,24 +429,59 @@ document.addEventListener("DOMContentLoaded", () => {
   const nextBtnModal = document.getElementById("modal-next-btn");
   const openLookbookBtn = document.getElementById("open-lookbook-btn");
 
+  const zoomInBtn = document.getElementById("modal-zoom-in");
+  const zoomOutBtn = document.getElementById("modal-zoom-out");
+  const zoomResetBtn = document.getElementById("modal-zoom-reset");
+  const zoomValEl = document.getElementById("modal-zoom-val");
+
   let activeGalleryIdx = 0;
+  let zoomScale = 1;
+  let panX = 0;
+  let panY = 0;
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+
+  function setZoom(scale, resetPan = true) {
+    zoomScale = Math.min(Math.max(scale, 1), 3.5);
+    if (zoomScale === 1 && resetPan) {
+      panX = 0;
+      panY = 0;
+    }
+    if (modalImg) {
+      modalImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale})`;
+      modalImg.classList.toggle("is-zoomed", zoomScale > 1);
+    }
+    if (zoomValEl) {
+      zoomValEl.textContent = `${Math.round(zoomScale * 100)}%`;
+    }
+  }
+
+  function resetZoom() {
+    panX = 0;
+    panY = 0;
+    setZoom(1, true);
+  }
 
   function openGallery(index) {
     if (!modal) return;
     activeGalleryIdx = index;
+    resetZoom();
     updateGalleryStage();
     modal.classList.add("is-active");
-    document.body.style.overflow = "hidden"; // disable scroll
+    document.body.style.overflow = "hidden";
   }
 
   function closeGallery() {
     if (!modal) return;
     modal.classList.remove("is-active");
-    document.body.style.overflow = ""; // enable scroll
+    document.body.style.overflow = "";
+    resetZoom();
   }
 
   function updateGalleryStage() {
     if (!modalImg || !modalCaption || !modalCounter) return;
+    resetZoom();
     const item = lookbookImages[activeGalleryIdx];
     modalImg.src = item.src;
     modalImg.alt = item.alt;
@@ -443,7 +499,47 @@ document.addEventListener("DOMContentLoaded", () => {
     updateGalleryStage();
   }
 
-  // Bind clicks on mosaic items
+  // Zoom button handlers
+  if (zoomInBtn) zoomInBtn.addEventListener("click", () => setZoom(zoomScale + 0.5));
+  if (zoomOutBtn) zoomOutBtn.addEventListener("click", () => setZoom(zoomScale - 0.5));
+  if (zoomResetBtn) zoomResetBtn.addEventListener("click", resetZoom);
+
+  // Click / Double click to zoom image
+  if (modalImg) {
+    modalImg.addEventListener("click", (e) => {
+      if (zoomScale > 1) {
+        resetZoom();
+      } else {
+        setZoom(2.2);
+      }
+    });
+
+    // Panning image when zoomed
+    modalImg.addEventListener("mousedown", (e) => {
+      if (zoomScale <= 1) return;
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+      modalImg.classList.add("is-dragging");
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging || zoomScale <= 1) return;
+      e.preventDefault();
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      setZoom(zoomScale, false);
+    });
+
+    window.addEventListener("mouseup", () => {
+      if (isDragging) {
+        isDragging = false;
+        if (modalImg) modalImg.classList.remove("is-dragging");
+      }
+    });
+  }
+
+  // Bind lookbook preview cards on home page
   document.querySelectorAll("a[data-gallery-idx]").forEach((el) => {
     el.addEventListener("click", (e) => {
       e.preventDefault();
@@ -452,14 +548,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Bind open lookbook button
   if (openLookbookBtn) {
     openLookbookBtn.addEventListener("click", () => {
       openGallery(0);
     });
   }
 
-  // Close triggers
   if (closeBtn) closeBtn.addEventListener("click", closeGallery);
   if (modal) {
     modal.addEventListener("click", (e) => {
@@ -469,16 +563,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Arrow controls
   if (prevBtnModal) prevBtnModal.addEventListener("click", prevGalleryItem);
   if (nextBtnModal) nextBtnModal.addEventListener("click", nextGalleryItem);
 
-  // Keyboard navigation
+  // Keyboard navigation & zoom shortcuts
   document.addEventListener("keydown", (e) => {
     if (!modal || !modal.classList.contains("is-active")) return;
     if (e.key === "Escape") closeGallery();
     if (e.key === "ArrowRight") nextGalleryItem();
     if (e.key === "ArrowLeft") prevGalleryItem();
+    if (e.key === "+" || e.key === "=") setZoom(zoomScale + 0.4);
+    if (e.key === "-") setZoom(zoomScale - 0.4);
+    if (e.key === "0") resetZoom();
   });
 
 });
