@@ -577,4 +577,34 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "0") resetZoom();
   });
 
+
+  /* ---------- Header Nav: Home, Logo & Shop Scroll Handling ---------- */
+  const isHome = () => {
+    const p = window.location.pathname.toLowerCase();
+    return p === '/' || p.endsWith('/index.html') || p.endsWith('/home') || p === '';
+  };
+
+  // Home & Logo links
+  document.querySelectorAll('a[href="index.html"], a[href="/"], a.brand').forEach((link) => {
+    link.addEventListener("click", (e) => {
+      if (isHome()) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+  });
+
+  // Shop link -> scroll to #shop (Curated Collection Kids, Embroidery & Creative Cottons)
+  document.querySelectorAll('a[href="index.html#shop"], a[href="#shop"]').forEach((link) => {
+    link.addEventListener("click", (e) => {
+      if (isHome()) {
+        e.preventDefault();
+        const shopSection = document.getElementById("shop");
+        if (shopSection) {
+          shopSection.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    });
+  });
+
 });
